@@ -1,4 +1,4 @@
-
+[ ![Codeship Status for buzzn/module-charts](https://app.codeship.com/projects/5756b3f0-a02b-0134-1660-620e497cce73/status?branch=master)](https://app.codeship.com/projects/189631)
 # module-charts
 
 To run local dev server:
