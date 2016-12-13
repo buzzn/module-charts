@@ -52,7 +52,6 @@ export class ChartWrapper extends Component {
                 <div className="basic-loading" style={{
                   width: '100%',
                   height: '100%',
-                  marginLeft: '3%',
                   position: 'absolute',
                   left: 0,
                   top: 0,
