@@ -14,24 +14,24 @@ describe('chart api', () => {
   chai.use(chaiAsPromised);
   const expect = chai.expect;
 
-  it('should return formatted group metering points', () => {
+  it('should return formatted group registers', () => {
     nock(apiUrl)
-    .get(`${apiPath}/groups/${group}/metering-points`)
+    .get(`${apiPath}/groups/${group}/registers`)
     .reply(200, {
       meta: { total_pages: 2 },
     });
 
     nock(apiUrl)
-    .get(`${apiPath}/groups/${group}/metering-points?page=1`)
+    .get(`${apiPath}/groups/${group}/registers?page=1`)
     .reply(200, {
-      data: [{ id: 'mp1', attributes: { mode: 'in' } }],
+      data: [{ id: 'mp1', attributes: { direction: 'in' } }],
       meta: { total_pages: 2 },
     });
 
     nock(apiUrl)
-    .get(`${apiPath}/groups/${group}/metering-points?page=2`)
+    .get(`${apiPath}/groups/${group}/registers?page=2`)
     .reply(200, {
-      data: [{ id: 'mp2', attributes: { mode: 'out' } }],
+      data: [{ id: 'mp2', attributes: { direction: 'out' } }],
       meta: { total_pages: 2 },
     });
 
@@ -39,13 +39,13 @@ describe('chart api', () => {
     .to.eventually.eql({ inIds: ['mp1'], outIds: ['mp2'] });
   });
 
-  it('should return power data for metering points', () => {
+  it('should return power data for registers', () => {
     const timestamp = new Date();
     const resolution = constants.RESOLUTIONS.DAY_MINUTE;
     const id = 'mpId';
 
     nock(apiUrl)
-    .get(`${apiPath}/aggregates/past?timestamp=${uriTimestamp(timestamp)}&resolution=${resolution}&metering_point_ids=${[id]}`)
+    .get(`${apiPath}/aggregates/past?timestamp=${uriTimestamp(timestamp)}&resolution=${resolution}&register_ids=${id}`)
     .reply(200, [
       { timestamp: timestamp.toISOString(), power_milliwatt: 113856.0 },
       { timestamp: moment(timestamp).add(15, 'minutes').toISOString(), power_milliwatt: 113856.0 },
