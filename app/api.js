@@ -30,7 +30,7 @@ function remainingPages({ apiUrl, apiPath, group, json }) {
     return [json];
   } else {
     return Promise.all(map(range(totalPages), page => (
-        fetch(`${apiUrl}${apiPath}/groups/${group}/metering-points?page=${page + 1}`, { headers: prepareHeaders() })
+        fetch(`${apiUrl}${apiPath}/groups/${group}/registers?page=${page + 1}`, { headers: prepareHeaders() })
         .then(parseResponse)
       )));
   }
@@ -40,7 +40,7 @@ function extractIds(jsonArr) {
   const ids = { inIds: [], outIds: [] };
   forEach(jsonArr, json => {
     forEach(json.data, m => {
-      if (m.attributes.mode === 'in') {
+      if (m.attributes.direction === 'in') {
         ids.inIds.push(m.id);
       } else {
         ids.outIds.push(m.id);
@@ -79,7 +79,7 @@ function formatScores(json) {
 
 function generateRequests({ apiUrl, apiPath, ids, timestamp, resolution }) {
   return map(ids, id => (
-    fetch(`${apiUrl}${apiPath}/aggregates/past?timestamp=${uriTimestamp(timestamp)}&resolution=${resolution}&metering_point_ids=${[id]}`, { headers: prepareHeaders() })
+    fetch(`${apiUrl}${apiPath}/aggregates/past?timestamp=${uriTimestamp(timestamp)}&resolution=${resolution}&register_ids=${id}`, { headers: prepareHeaders() })
     .then(parseResponse)
     .then(values => ({ id, values: map(values, v => ({ powerMilliwatt: getPower(v, resolution), timestamp: new Date(v.timestamp).getTime() })) }))
     )
@@ -94,7 +94,7 @@ function filterData(data) {
 
 export default {
   getIds: ({ apiUrl, apiPath, group }) => (
-      fetch(`${apiUrl}${apiPath}/groups/${group}/metering-points`, { headers: prepareHeaders() })
+      fetch(`${apiUrl}${apiPath}/groups/${group}/registers`, { headers: prepareHeaders() })
       .then(parseResponse)
       .then(json => remainingPages({ apiUrl, apiPath, group, json }))
       .then(extractIds)
