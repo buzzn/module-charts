@@ -5,6 +5,7 @@ typings/
 .DS_Store
 npm-debug.log
 yarn-error.log
+settings.json
 
 node_modules/*
 
