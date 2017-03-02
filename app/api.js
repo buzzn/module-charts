@@ -25,7 +25,7 @@ function parseResponse(response) {
 }
 
 function remainingPages({ apiUrl, apiPath, group, json }) {
-  const totalPages = json.meta.total_pages;
+  const totalPages = json.meta ? json.meta.total_pages : 1;
   if (totalPages === 1) {
     return [json];
   } else {
