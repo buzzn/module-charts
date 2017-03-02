@@ -14,7 +14,7 @@ describe('chart api', () => {
   chai.use(chaiAsPromised);
   const expect = chai.expect;
 
-  it('should return formatted group registers', () => {
+  it('should return formatted group registers for paginated response', () => {
     nock(apiUrl)
     .get(`${apiPath}/groups/${group}/registers`)
     .reply(200, {
@@ -33,6 +33,17 @@ describe('chart api', () => {
     .reply(200, {
       data: [{ id: 'mp2', attributes: { direction: 'out' } }],
       meta: { total_pages: 2 },
+    });
+
+    return expect(api.getIds({ apiUrl, apiPath, group }))
+    .to.eventually.eql({ inIds: ['mp1'], outIds: ['mp2'] });
+  });
+
+  it('should return formatted group registers for no-paginated response', () => {
+    nock(apiUrl)
+    .get(`${apiPath}/groups/${group}/registers`)
+    .reply(200, {
+      data: [{ id: 'mp1', attributes: { direction: 'in' } }, { id: 'mp2', attributes: { direction: 'out' } }],
     });
 
     return expect(api.getIds({ apiUrl, apiPath, group }))
