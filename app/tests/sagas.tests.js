@@ -2,14 +2,14 @@ import { expect } from 'chai';
 import { delay } from 'redux-saga';
 import { call, put, fork, take, select, race } from 'redux-saga/effects';
 import moment from 'moment';
-import chartsSaga, { getConfig, getCharts, clearAll, clearData, getIds, getData } from '../sagas';
+import chartsSaga, { getConfig, getCharts, clearAll, clearData, getIds, getData, getToken } from '../sagas';
 import { constants, actions } from '../actions';
 import api from '../api';
 import { getMomentPeriod } from '../util/process_data';
 
 describe('charts sagas', () => {
   describe('helper selectors should return proper state parts', () => {
-    const state = { config: 'config', charts: 'charts' };
+    const state = { config: 'config', charts: 'charts', auth: { token: 'token' } };
 
     it('config selector', () => {
       expect(getConfig(state)).to.eql(state.config);
@@ -17,6 +17,10 @@ describe('charts sagas', () => {
 
     it('charts selector', () => {
       expect(getCharts(state)).to.eql(state.charts);
+    });
+
+    it('token selector', () => {
+      expect(getToken(state)).to.eql(state.auth.token);
     });
   });
 
@@ -68,6 +72,7 @@ describe('charts sagas', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
     const group = 'group';
+    const token = 'token';
     const inIds = [];
     const outIds = [];
     const generator = getIds({ apiUrl, apiPath });
@@ -82,9 +87,14 @@ describe('charts sagas', () => {
       .to.eql(take(constants.SET_GROUP));
     });
 
-    it('should call api.getIds with api params', () => {
+    it('should get token from state', () => {
       expect(generator.next({ group }).value)
-      .to.eql(call(api.getIds, { apiUrl, apiPath, group }));
+      .to.eql(select(getToken));
+    });
+
+    it('should call api.getIds with api params', () => {
+      expect(generator.next(token).value)
+      .to.eql(call(api.getIds, { apiUrl, apiPath, group, token }));
     });
 
     it('should dispatch setIds with received ids', () => {
@@ -102,12 +112,14 @@ describe('charts sagas', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
     const group = 'group';
+    const token = 'token';
     const generator = getIds({ apiUrl, apiPath });
 
     it('should call clearAll if case of error', () => {
       generator.next();
       generator.next();
       generator.next({ group });
+      generator.next(token);
       expect(generator.next().value)
       .to.eql(call(clearAll));
     });
@@ -117,12 +129,14 @@ describe('charts sagas', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
     const group = null;
+    const token = 'token';
     const generator = getIds({ apiUrl, apiPath });
 
     it('should call clearAll if there is no groupId', () => {
       generator.next();
       generator.next();
-      expect(generator.next({ group }).value)
+      generator.next({ group });
+      expect(generator.next(token).value)
       .to.eql(call(clearAll));
     });
   });
@@ -131,6 +145,7 @@ describe('charts sagas', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
     const group = 'group';
+    const token = 'token';
     const inIds = [];
     const outIds = [];
     const inData = [];
@@ -159,17 +174,22 @@ describe('charts sagas', () => {
 
     it('should call api.getData for inIds', () => {
       expect(generator.next({ inIds, outIds, resolution, timestamp, shouldUpdate, group }).value)
-      .to.eql(call(api.getData, { apiUrl, apiPath, ids: inIds, timestamp, resolution }));
+      .to.eql(select(getToken));
+    });
+
+    it('should call api.getData for inIds', () => {
+      expect(generator.next(token).value)
+      .to.eql(call(api.getData, { apiUrl, apiPath, ids: inIds, timestamp, resolution, token }));
     });
 
     it('should call api.getData for outIds', () => {
       expect(generator.next(inData).value)
-      .to.eql(call(api.getData, { apiUrl, apiPath, ids: outIds, timestamp, resolution }));
+      .to.eql(call(api.getData, { apiUrl, apiPath, ids: outIds, timestamp, resolution, token }));
     });
 
     it('should call api.getScores', () => {
       expect(generator.next(outData).value)
-      .to.eql(call(api.getScores, { apiUrl, apiPath, group, timestamp, interval }));
+      .to.eql(call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token }));
     });
 
     it('should dispatch setData with received data', () => {
@@ -210,6 +230,7 @@ describe('charts sagas', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
     const group = 'group';
+    const token = 'token';
     const inIds = [];
     const outIds = [];
     const inData = [];
@@ -225,6 +246,7 @@ describe('charts sagas', () => {
       generator.next();
       generator.next();
       generator.next({ inIds, outIds, resolution, timestamp, shouldUpdate, group });
+      generator.next(token);
       generator.next(inData);
       generator.next(outData);
       generator.next(scores);
@@ -243,6 +265,7 @@ describe('charts sagas', () => {
   describe('getData errorflow', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
+    const token = 'token';
     const inIds = [];
     const timestamp = new Date();
     const resolution = constants.RESOLUTIONS.DAY_MINUTE;
@@ -253,6 +276,7 @@ describe('charts sagas', () => {
       generator.next();
       generator.next();
       generator.next({ apiUrl, apiPath, inIds, timestamp, resolution });
+      generator.next(token);
       expect(generator.throw('err').value)
       .to.eql(call(clearData));
     });

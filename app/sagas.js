@@ -7,6 +7,8 @@ import { getMomentPeriod } from './util/process_data';
 
 export const getConfig = state => state.config;
 export const getCharts = state => state.charts;
+// TODO: switch to action with parameter later, decouple from module-auth
+export const getToken = state => (state.auth || {}).token;
 
 export function* clearAll() {
   yield put(actions.setIds({ inIds: [], outIds: [] }));
@@ -22,9 +24,10 @@ export function* getIds({ apiUrl, apiPath }) {
     yield put(actions.loading());
 
     const { group } = yield take(constants.SET_GROUP);
+    const token = yield select(getToken);
     if (group) {
       try {
-        const { inIds, outIds } = yield call(api.getIds, { apiUrl, apiPath, group });
+        const { inIds, outIds } = yield call(api.getIds, { apiUrl, apiPath, group, token });
         yield put(actions.setIds({ inIds, outIds }));
         yield put(actions.chartUpdate());
       } catch (error) {
@@ -43,12 +46,13 @@ export function* getData({ apiUrl, apiPath }) {
     yield put(actions.loading());
 
     const { inIds, outIds, resolution, timestamp, shouldUpdate, group } = yield select(getCharts);
+    const token = yield select(getToken);
 
     try {
-      const inData = yield call(api.getData, { apiUrl, apiPath, ids: inIds, timestamp, resolution });
-      const outData = yield call(api.getData, { apiUrl, apiPath, ids: outIds, timestamp, resolution });
+      const inData = yield call(api.getData, { apiUrl, apiPath, ids: inIds, timestamp, resolution, token });
+      const outData = yield call(api.getData, { apiUrl, apiPath, ids: outIds, timestamp, resolution, token });
       const interval = getMomentPeriod(resolution);
-      const scores = yield call(api.getScores, { apiUrl, apiPath, group, timestamp, interval });
+      const scores = yield call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token });
       yield put(actions.setData({ inData, outData }));
       yield put(actions.setScores(scores));
     } catch (error) {

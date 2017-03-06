@@ -8,11 +8,13 @@ import isArray from 'lodash/isArray';
 import find from 'lodash/find';
 import { constants } from './actions';
 
-function prepareHeaders() {
-  return {
+function prepareHeaders(token) {
+  const headers =  {
     Accept: 'application/json',
     'Content-Type': 'application/json',
   };
+  if (token) headers.Authorization = `Bearer ${token}`;
+  return headers;
 }
 
 function parseResponse(response) {
@@ -24,13 +26,13 @@ function parseResponse(response) {
   }
 }
 
-function remainingPages({ apiUrl, apiPath, group, json }) {
+function remainingPages({ apiUrl, apiPath, group, json, token }) {
   const totalPages = json.meta ? json.meta.total_pages : 1;
   if (totalPages === 1) {
     return [json];
   } else {
     return Promise.all(map(range(totalPages), page => (
-        fetch(`${apiUrl}${apiPath}/groups/${group}/registers?page=${page + 1}`, { headers: prepareHeaders() })
+        fetch(`${apiUrl}${apiPath}/groups/${group}/registers?page=${page + 1}`, { headers: prepareHeaders(token) })
         .then(parseResponse)
       )));
   }
@@ -77,9 +79,9 @@ function formatScores(json) {
   return scores;
 }
 
-function generateRequests({ apiUrl, apiPath, ids, timestamp, resolution }) {
+function generateRequests({ apiUrl, apiPath, ids, timestamp, resolution, token }) {
   return map(ids, id => (
-    fetch(`${apiUrl}${apiPath}/aggregates/past?timestamp=${uriTimestamp(timestamp)}&resolution=${resolution}&register_ids=${id}`, { headers: prepareHeaders() })
+    fetch(`${apiUrl}${apiPath}/aggregates/past?timestamp=${uriTimestamp(timestamp)}&resolution=${resolution}&register_ids=${id}`, { headers: prepareHeaders(token) })
     .then(parseResponse)
     .then(values => ({ id, values: map(values, v => ({ powerMilliwatt: getPower(v, resolution), timestamp: new Date(v.timestamp).getTime() })) }))
     )
@@ -93,18 +95,18 @@ function filterData(data) {
 }
 
 export default {
-  getIds: ({ apiUrl, apiPath, group }) => (
-      fetch(`${apiUrl}${apiPath}/groups/${group}/registers`, { headers: prepareHeaders() })
+  getIds: ({ apiUrl, apiPath, group, token }) => (
+      fetch(`${apiUrl}${apiPath}/groups/${group}/registers`, { headers: prepareHeaders(token) })
       .then(parseResponse)
-      .then(json => remainingPages({ apiUrl, apiPath, group, json }))
+      .then(json => remainingPages({ apiUrl, apiPath, group, json, token }))
       .then(extractIds)
     ),
   getData: (params) => (
     Promise.all(generateRequests(params))
     .then(filterData)
   ),
-  getScores: ({ apiUrl, apiPath, group, interval, timestamp }) => (
-    fetch(`${apiUrl}${apiPath}/groups/${group}/scores?timestamp=${uriTimestamp(timestamp)}&interval=${interval}`, { headers: prepareHeaders() })
+  getScores: ({ apiUrl, apiPath, group, interval, timestamp, token }) => (
+    fetch(`${apiUrl}${apiPath}/groups/${group}/scores?timestamp=${uriTimestamp(timestamp)}&interval=${interval}`, { headers: prepareHeaders(token) })
     .then(parseResponse)
     .then(formatScores)
   ),
