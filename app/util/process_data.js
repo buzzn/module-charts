@@ -118,22 +118,22 @@ function formatNumber(value) {
   return formattedNumber;
 }
 
-export function formatLabel(value, mode) {
+export function formatLabel(value, mode, type) {
   let result = '';
 
   const number = formatNumber(value);
   if (value >= 1000000000000000) {
-    result = `${number} PWh`;
+    result = `${number} PW`;
   } else if (value >= 1000000000000) {
-    result = `${number} TWh`;
+    result = `${number} TW`;
   } else if (value >= 1000000000) {
-    result = `${number} GWh`;
+    result = `${number} GW`;
   } else if (value >= 1000000) {
-    result = `${number} MWh`;
+    result = `${number} MW`;
   } else if (value >= 1000) {
-    result = `${number} kWh`;
+    result = `${number} kW`;
   } else {
-    result = `${number} Wh`;
+    result = `${number} W`;
   }
-  return result;
+  return type === 'h' ? `${result}h` : result;
 }

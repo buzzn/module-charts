@@ -172,7 +172,7 @@ describe('charts sagas', () => {
       .to.eql(select(getCharts));
     });
 
-    it('should call api.getData for inIds', () => {
+    it('should select token from store', () => {
       expect(generator.next({ inIds, outIds, resolution, timestamp, shouldUpdate, group }).value)
       .to.eql(select(getToken));
     });
@@ -187,18 +187,18 @@ describe('charts sagas', () => {
       .to.eql(call(api.getData, { apiUrl, apiPath, ids: outIds, timestamp, resolution, token }));
     });
 
-    it('should call api.getScores', () => {
-      expect(generator.next(outData).value)
-      .to.eql(call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token }));
-    });
-
     it('should dispatch setData with received data', () => {
-      expect(generator.next(scores).value)
+      expect(generator.next(outData).value)
       .to.eql(put(actions.setData({ inData, outData })));
     });
 
-    it('should dispatch setScores with received data', () => {
+    it('should call api.getScores', () => {
       expect(generator.next().value)
+      .to.eql(call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token }));
+    });
+
+    it('should dispatch setScores with received data', () => {
+      expect(generator.next(scores).value)
       .to.eql(put(actions.setScores(scores)));
     });
 
@@ -226,6 +226,42 @@ describe('charts sagas', () => {
     });
   });
 
+  describe('getData correct currentTime flow with hour to minute resolution', () => {
+    const apiUrl = 'http://localhost:3000';
+    const apiPath = '/api/v1/';
+    const group = 'group';
+    const token = 'token';
+    const inIds = [];
+    const outIds = [];
+    const inData = [];
+    const outData = [];
+    const timestamp = moment().subtract(2, 'days').toDate();
+    const resolution = constants.RESOLUTIONS.HOUR_MINUTE;
+    const shouldUpdate = true;
+    const generator = getData({ apiUrl, apiPath });
+
+    generator.next();
+    generator.next();
+    generator.next();
+    generator.next({ inIds, outIds, resolution, timestamp, shouldUpdate, group });
+    generator.next(token);
+    generator.next(inData);
+    generator.next(outData);
+
+    it('should dispatch loaded', () => {
+      expect(generator.next().value)
+      .to.eql(put(actions.loaded()));
+    });
+
+    it('should wait for data refresh events', () => {
+      expect(generator.next().value)
+      .to.eql(race({
+        delay: call(delay, 5 * 60 * 1000),
+        chartUpdate: take(constants.CHART_UPDATE),
+      }));
+    });
+  });
+
   describe('getData correct pastTime flow', () => {
     const apiUrl = 'http://localhost:3000';
     const apiPath = '/api/v1/';
@@ -249,8 +285,8 @@ describe('charts sagas', () => {
       generator.next(token);
       generator.next(inData);
       generator.next(outData);
-      generator.next(scores);
       generator.next();
+      generator.next(scores);
       generator.next();
       expect(generator.next().value)
       .to.eql(take(constants.CHART_UPDATE));
