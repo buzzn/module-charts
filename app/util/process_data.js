@@ -118,7 +118,7 @@ function formatNumber(value) {
   return formattedNumber;
 }
 
-export function formatLabel(value, mode) {
+export function formatLabel(value, mode, type) {
   let result = '';
 
   const number = formatNumber(value);
@@ -135,5 +135,5 @@ export function formatLabel(value, mode) {
   } else {
     result = `${number} W`;
   }
-  return result;
+  return type === 'h' ? `${result}h` : result;
 }

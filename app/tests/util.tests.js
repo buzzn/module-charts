@@ -12,6 +12,15 @@ describe('charts helper functions', () => {
       expect(formatLabel(1000)).to.equal('1 kW');
       expect(formatLabel(100)).to.equal('100 W');
     });
+
+    it('should return properly formatted label for different values with "h" type', () => {
+      expect(formatLabel(1000000000000000, null, 'h')).to.equal('1 PWh');
+      expect(formatLabel(1000000000000, null, 'h')).to.equal('1 TWh');
+      expect(formatLabel(1000000000, null, 'h')).to.equal('1 GWh');
+      expect(formatLabel(1000000, null, 'h')).to.equal('1 MWh');
+      expect(formatLabel(1000, null, 'h')).to.equal('1 kWh');
+      expect(formatLabel(100, null, 'h')).to.equal('100 Wh');
+    });
   });
 
   describe('getMomentPeriod', () => {

@@ -51,10 +51,12 @@ export function* getData({ apiUrl, apiPath }) {
     try {
       const inData = yield call(api.getData, { apiUrl, apiPath, ids: inIds, timestamp, resolution, token });
       const outData = yield call(api.getData, { apiUrl, apiPath, ids: outIds, timestamp, resolution, token });
-      const interval = getMomentPeriod(resolution);
-      const scores = yield call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token });
       yield put(actions.setData({ inData, outData }));
-      yield put(actions.setScores(scores));
+      if (resolution !== constants.RESOLUTIONS.HOUR_MINUTE) {
+        const interval = getMomentPeriod(resolution);
+        const scores = yield call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token });
+        yield put(actions.setScores(scores));
+      }
     } catch (error) {
       console.log(error);
       yield call(clearData);

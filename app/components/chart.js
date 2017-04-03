@@ -4,7 +4,7 @@ import ReactHighcharts from 'react-highcharts';
 import moment from 'moment';
 import map from 'lodash/map';
 import config from '../util/chart_config';
-import { sumData, getMomentPeriod } from '../util/process_data';
+import { sumData, getMomentPeriod, formatLabel } from '../util/process_data';
 import { constants, actions } from '../actions';
 
 export class Chart extends Component {
@@ -29,20 +29,34 @@ export class Chart extends Component {
 
     const chartTitle = { text: '' };
 
+    let currentType = '';
+
+    const axisFormatter = function(type) {
+      return function() { return formatLabel(this.value, 'axis', type); };
+    };
+
+    const tooltipFormatter = function(type) {
+      return function() { return `${this.series.name}: <b>${formatLabel(this.y, 'tooltip', type)}</b><br/>`; };
+    };
+
     moment.locale('de');
     switch (resolution) {
       case constants.RESOLUTIONS.YEAR_MONTH:
         chartTitle.text = moment(timestamp).format('YYYY');
+        currentType = 'h';
         break;
       case constants.RESOLUTIONS.MONTH_DAY:
         chartTitle.text = moment(timestamp).format('MMMM YYYY');
+        currentType = 'h';
         break;
       case constants.RESOLUTIONS.HOUR_MINUTE:
         chartTitle.text = `${moment(timestamp).format('DD.MM.YYYY')} ... ${moment(timestamp).startOf('hour').format('HH:mm')} - ${moment(timestamp).endOf('hour').format('HH:mm')}`;
+        currentType = '';
         break;
       default:
       case constants.RESOLUTIONS.DAY_MINUTE:
         chartTitle.text = moment(timestamp).format('DD.MM.YYYY');
+        currentType = '';
         break;
     }
 
@@ -78,10 +92,36 @@ export class Chart extends Component {
     switch (resolution) {
       case constants.RESOLUTIONS.YEAR_MONTH:
       case constants.RESOLUTIONS.MONTH_DAY:
-        this.chart.series.forEach(series => series.update({ type: 'column', events: { click(event) { zoomIn(event.point.x, resolution); } } }));
+        this.chart.update({
+          yAxis: {
+            labels: {
+              formatter: axisFormatter(currentType),
+            },
+          },
+        });
+        this.chart.series.forEach((series) => {
+          series.update({
+            type: 'column',
+            tooltip: { pointFormatter: tooltipFormatter(currentType) },
+            events: { click(event) { zoomIn(event.point.x, resolution); } },
+          });
+        });
         break;
       default:
-        this.chart.series.forEach(series => series.update({ type: 'areaspline', events: { click(event) { zoomIn(event.point.x, resolution); } } }));
+        this.chart.update({
+          yAxis: {
+            labels: {
+              formatter: axisFormatter(currentType),
+            },
+          },
+        });
+        this.chart.series.forEach((series) => {
+          series.update({
+            type: 'areaspline',
+            tooltip: { pointFormatter: tooltipFormatter(currentType) },
+            events: { click(event) { zoomIn(event.point.x, resolution); } },
+          });
+        });
         break;
     }
 
