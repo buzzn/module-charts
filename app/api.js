@@ -2,14 +2,13 @@ import 'whatwg-fetch';
 import moment from 'moment';
 import forEach from 'lodash/forEach';
 import map from 'lodash/map';
-import range from 'lodash/range';
 import filter from 'lodash/filter';
 import isArray from 'lodash/isArray';
 import find from 'lodash/find';
 import { constants } from './actions';
 
 function prepareHeaders(token) {
-  const headers =  {
+  const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
   };
@@ -26,28 +25,16 @@ function parseResponse(response) {
   }
 }
 
-function remainingPages({ apiUrl, apiPath, group, json, token }) {
-  const totalPages = json.meta ? json.meta.total_pages : 1;
-  if (totalPages === 1) {
-    return [json];
-  } else {
-    return Promise.all(map(range(totalPages), page => (
-        fetch(`${apiUrl}${apiPath}/groups/${group}/registers?page=${page + 1}`, { headers: prepareHeaders(token) })
-        .then(parseResponse)
-      )));
-  }
-}
-
-function extractIds(jsonArr) {
+function extractIds(jsonRaw) {
   const ids = { inIds: [], outIds: [] };
-  forEach(jsonArr, json => {
-    forEach(json.data, m => {
-      if (m.attributes.direction === 'in') {
-        ids.inIds.push(m.id);
-      } else {
-        ids.outIds.push(m.id);
-      }
-    });
+  const json = jsonRaw.data ? jsonRaw.data : jsonRaw;
+  forEach(json, mRaw => {
+    const m = mRaw.attributes ? { id: mRaw.id, ...mRaw.attributes } : mRaw;
+    if (m.direction === 'in') {
+      ids.inIds.push(m.id);
+    } else {
+      ids.outIds.push(m.id);
+    }
   });
   return ids;
 }
@@ -70,11 +57,12 @@ export function getPower(v, resolution) {
   return power;
 }
 
-function formatScores(json) {
+function formatScores(jsonRaw) {
   const scores = {};
+  const json = map(jsonRaw.data || jsonRaw, jr => jr.attributes || jr);
   forEach(['fitting', 'autarchy', 'closeness', 'sufficiency'], type => {
-    const score = find(json.data, j => j.attributes.mode === type);
-    scores[type] = score ? score.attributes.value : 0;
+    const score = find(json, j => j.mode === type);
+    scores[type] = score ? score.value : 0;
   });
   return scores;
 }
@@ -98,7 +86,6 @@ export default {
   getIds: ({ apiUrl, apiPath, group, token }) => (
       fetch(`${apiUrl}${apiPath}/groups/${group}/registers`, { headers: prepareHeaders(token) })
       .then(parseResponse)
-      .then(json => remainingPages({ apiUrl, apiPath, group, json, token }))
       .then(extractIds)
     ),
   getData: (params) => (
