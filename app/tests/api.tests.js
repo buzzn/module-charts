@@ -14,26 +14,21 @@ describe('chart api', () => {
   chai.use(chaiAsPromised);
   const expect = chai.expect;
 
-  it('should return formatted group registers for paginated response', () => {
+  it('should return formatted group registers for paginated response for old api', () => {
     nock(apiUrl)
     .get(`${apiPath}/groups/${group}/registers`)
     .reply(200, {
-      meta: { total_pages: 2 },
+      data: [{ id: 'mp1', attributes: { direction: 'in' } }, { id: 'mp2', attributes: { direction: 'out' } }],
     });
 
-    nock(apiUrl)
-    .get(`${apiPath}/groups/${group}/registers?page=1`)
-    .reply(200, {
-      data: [{ id: 'mp1', attributes: { direction: 'in' } }],
-      meta: { total_pages: 2 },
-    });
+    return expect(api.getIds({ apiUrl, apiPath, group }))
+    .to.eventually.eql({ inIds: ['mp1'], outIds: ['mp2'] });
+  });
 
+  it('should return formatted group registers for paginated response for new api', () => {
     nock(apiUrl)
-    .get(`${apiPath}/groups/${group}/registers?page=2`)
-    .reply(200, {
-      data: [{ id: 'mp2', attributes: { direction: 'out' } }],
-      meta: { total_pages: 2 },
-    });
+    .get(`${apiPath}/groups/${group}/registers`)
+    .reply(200, [{ id: 'mp1', direction: 'in' }, { id: 'mp2', direction: 'out' }]);
 
     return expect(api.getIds({ apiUrl, apiPath, group }))
     .to.eventually.eql({ inIds: ['mp1'], outIds: ['mp2'] });
