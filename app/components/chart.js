@@ -24,8 +24,8 @@ export class Chart extends Component {
   componentWillReceiveProps(nextProps) {
     const { resolution, timestamp, inData, outData, setResolution, setTimestamp, chartUpdate } = nextProps;
 
-    const inSum = sumData({ data: inData, resolution });
-    const outSum = sumData({ data: outData, resolution });
+    const inSum = inData;
+    const outSum = outData;
 
     const chartTitle = { text: '' };
 
