@@ -129,6 +129,7 @@ export class Chart extends Component {
 
     this.chart.xAxis[0].setExtremes(moment(timestamp).startOf(momentRes).valueOf(), moment(timestamp).endOf(momentRes).valueOf());
     // this.chart.yAxis[0].setExtremes();
+    this.chart.redraw();
   }
 
   shouldComponentUpdate(nextProps, nextState) {

@@ -20,8 +20,8 @@ export const constants = {
 
 export const actions = {
   setApiParams: ({ apiUrl, apiPath }) => ({ type: constants.SET_API_PARAMS, apiUrl, apiPath }),
-  setToken: ({ token }) => ({ type: constants.SET_TOKEN, token }),
-  setGroup: group => ({ type: constants.SET_GROUP, group }),
+  setToken: token => ({ type: constants.SET_TOKEN, token }),
+  setGroup: groupId => ({ type: constants.SET_GROUP, groupId }),
   setData: data => ({ type: constants.SET_DATA, data }),
   setResolution: resolution => ({ type: constants.SET_RESOLUTION, resolution }),
   setTimestamp: timestamp => ({ type: constants.SET_TIMESTAMP, timestamp }),

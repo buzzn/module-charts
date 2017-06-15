@@ -38,16 +38,16 @@ function formatScores(jsonRaw) {
 }
 
 export default {
-  getChart: ({ apiUrl, apiPath, group, timestamp, resolution, token }) => (
-    fetch(`${apiUrl}${apiPath}/${group}/charts?timestamp=${uriTimestamp(timestamp)}&duration=${resolution}`)
+  getChart: ({ apiUrl, apiPath, groupId, timestamp, resolution, token }) => (
+    fetch(`${apiUrl}${apiPath}/${groupId}/charts?timestamp=${uriTimestamp(timestamp)}&duration=${resolution}`, { headers: prepareHeaders(token) })
     .then(parseResponse)
     .then(data => ({
       inData: data.in.map(d => ({ powerMilliwatt: d.value, timestamp: new Date(d.timestamp).getTime() })),
       outData: data.out.map(d => ({ powerMilliwatt: d.value, timestamp: new Date(d.timestamp).getTime() })),
     }))
   ),
-  getScores: ({ apiUrl, apiPath, group, interval, timestamp, token }) => (
-    fetch(`${apiUrl}${apiPath}/${group}/scores?timestamp=${uriTimestamp(timestamp)}&interval=${interval}`, { headers: prepareHeaders(token) })
+  getScores: ({ apiUrl, apiPath, groupId, interval, timestamp, token }) => (
+    fetch(`${apiUrl}${apiPath}/${groupId}/scores?timestamp=${uriTimestamp(timestamp)}&interval=${interval}`, { headers: prepareHeaders(token) })
     .then(parseResponse)
     .then(formatScores)
   ),

@@ -3,7 +3,7 @@ import { constants } from './actions';
 import { getMomentPeriod } from './util/process_data';
 
 const initialState = {
-  group: '',
+  groupId: '',
   resolution: constants.RESOLUTIONS.DAY_MINUTE,
   timestamp: new Date(),
   inData: [],
@@ -20,7 +20,7 @@ export function shouldUpdate(timestamp, resolution) {
 export default (state = initialState, action) => {
   switch (action.type) {
     case constants.SET_GROUP:
-      return { ...state, group: action.group };
+      return { ...state, groupId: action.groupId };
     case constants.SET_DATA:
       return { ...state, ...action.data };
     case constants.SET_RESOLUTION:

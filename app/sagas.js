@@ -7,34 +7,37 @@ import { getMomentPeriod } from './util/process_data';
 
 export const getConfig = state => state.config;
 export const getCharts = state => state.charts;
-// TODO: switch to action with parameter later, decouple from module-auth
-export const getToken = state => (state.auth || {}).token;
 
 export function* clearData() {
   yield put(actions.setData({ inData: [], outData: [] }));
 }
 
-export function* getData({ apiUrl, apiPath }) {
-  while (true) {
-    yield put(actions.loading());
+export function* fetchData({ apiUrl, apiPath, token, groupId }) {
+  yield put(actions.loading());
 
-    const { resolution, timestamp, shouldUpdate, group } = yield select(getCharts);
-    const token = yield select(getToken);
+  const { resolution, timestamp } = yield select(getCharts);
 
-    try {
-      const data = yield call(api.getChart, { apiUrl, apiPath, group, timestamp, resolution, token });
-      yield put(actions.setData(data));
-      if (resolution !== constants.RESOLUTIONS.HOUR_MINUTE) {
-        const interval = getMomentPeriod(resolution);
-        const scores = yield call(api.getScores, { apiUrl, apiPath, group, timestamp, interval, token });
-        yield put(actions.setScores(scores));
-      }
-    } catch (error) {
-      console.log(error);
-      yield call(clearData);
+  try {
+    const data = yield call(api.getChart, { apiUrl, apiPath, groupId, timestamp, resolution, token });
+    yield put(actions.setData(data));
+    if (resolution !== constants.RESOLUTIONS.HOUR_MINUTE) {
+      const interval = getMomentPeriod(resolution);
+      // const scores = yield call(api.getScores, { apiUrl, apiPath, groupId, timestamp, interval, token });
+      // yield put(actions.setScores(scores));
     }
+  } catch (error) {
+    console.log(error);
+    yield call(clearData);
+  }
 
-    yield put(actions.loaded());
+  yield put(actions.loaded());
+}
+
+export function* getData({ apiUrl, apiPath, token }, { groupId }) {
+  while (true) {
+    yield call(fetchData, { apiUrl, apiPath, token, groupId });
+
+    const { resolution, timestamp, shouldUpdate } = yield select(getCharts);
 
     if (shouldUpdate) {
       let updateDelay = 5 * 60 * 1000;
@@ -71,22 +74,26 @@ export function* getData({ apiUrl, apiPath }) {
   }
 }
 
+export function* chartSagas({ apiUrl, apiPath, token, groupId }) {
+  yield takeLatest(constants.SET_GROUP, getData, { apiUrl, apiPath, token });
+  if (groupId) yield put(actions.setGroup(groupId));
+}
+
 export default function* chartsSaga() {
   const { apiUrl, apiPath } = yield take(constants.SET_API_PARAMS);
   let { token } = yield take(constants.SET_TOKEN);
 
-  yield takeLatest(constants.SET_GROUP, getData, { apiUrl, apiPath });
-
-  // let groupId = yield select(getGroupId);
-  // if (groupId) {
-  //   yield fork(getGroupBubbles, { apiUrl, apiPath, token, groupId });
-  // }
+  let { groupId } = yield select(getCharts);
+  if (groupId) {
+    yield call(fetchData, { apiUrl, apiPath, token, groupId });
+  }
 
   while (true) {
-    // const sagas = yield fork(bubblesSagas, { apiUrl, apiPath, token, groupId });
-    const sagas = takeLatest(constants.SET_GROUP, getData, { apiUrl, apiPath });
+    const sagas = yield fork(chartSagas, { apiUrl, apiPath, token, groupId });
     const payload = yield take(constants.SET_TOKEN);
     token = payload.token;
+    const { groupId: newGroupId } = yield select(getCharts);
+    groupId = newGroupId;
     yield cancel(sagas);
   }
 }
