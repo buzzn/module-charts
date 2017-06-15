@@ -24,8 +24,8 @@ export class Chart extends Component {
   componentWillReceiveProps(nextProps) {
     const { resolution, timestamp, inData, outData, setResolution, setTimestamp, chartUpdate } = nextProps;
 
-    const inSum = sumData({ data: inData, resolution });
-    const outSum = sumData({ data: outData, resolution });
+    const inSum = inData;
+    const outSum = outData;
 
     const chartTitle = { text: '' };
 
@@ -129,6 +129,7 @@ export class Chart extends Component {
 
     this.chart.xAxis[0].setExtremes(moment(timestamp).startOf(momentRes).valueOf(), moment(timestamp).endOf(momentRes).valueOf());
     // this.chart.yAxis[0].setExtremes();
+    this.chart.redraw();
   }
 
   shouldComponentUpdate(nextProps, nextState) {

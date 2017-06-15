@@ -1,12 +1,14 @@
 export const constants = {
+  SET_API_PARAMS: 'buzzn_charts/SET_API_PARAMS',
+  SET_TOKEN: 'buzzn_charts/SET_TOKEN',
+
   SET_GROUP: 'buzzn_charts/SET_GROUP',
-  SET_IDS: 'buzzn_charts/SET_IDS',
   SET_DATA: 'buzzn_charts/SET_DATA',
   RESOLUTIONS: {
-    DAY_MINUTE: 'day_to_minutes',
-    HOUR_MINUTE: 'hour_to_minutes',
-    MONTH_DAY: 'month_to_days',
-    YEAR_MONTH: 'year_to_months',
+    DAY_MINUTE: 'day',
+    HOUR_MINUTE: 'hour',
+    MONTH_DAY: 'month',
+    YEAR_MONTH: 'year',
   },
   SET_RESOLUTION: 'buzzn_charts/SET_RESOLUTION',
   SET_TIMESTAMP: 'buzzn_charts/SET_TIMESTAMP',
@@ -17,8 +19,9 @@ export const constants = {
 };
 
 export const actions = {
-  setGroup: group => ({ type: constants.SET_GROUP, group }),
-  setIds: ids => ({ type: constants.SET_IDS, ids }),
+  setApiParams: ({ apiUrl, apiPath }) => ({ type: constants.SET_API_PARAMS, apiUrl, apiPath }),
+  setToken: token => ({ type: constants.SET_TOKEN, token }),
+  setGroup: groupId => ({ type: constants.SET_GROUP, groupId }),
   setData: data => ({ type: constants.SET_DATA, data }),
   setResolution: resolution => ({ type: constants.SET_RESOLUTION, resolution }),
   setTimestamp: timestamp => ({ type: constants.SET_TIMESTAMP, timestamp }),
