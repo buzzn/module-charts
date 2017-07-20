@@ -29,10 +29,42 @@ export class Chart extends Component {
     };
 
     const tooltipFormatter = function(type) {
-      return function() { return `${this.series.name.split('<')[0]}: <b>${formatLabel(calcEnergy(this.series.data.map(p => ({ timestamp: p.x, value: p.y })), resolution, this.x), 'tooltip', type)}</b><br/>`; };
+      return function() {
+        switch (resolution) {
+          case constants.RESOLUTIONS.DAY_MINUTE:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('DD. MMMM, HH:mm')}</b><br/>
+              Power: <b>${formatLabel(this.y, resolution)}</b><br/>
+              Energy: <b>${formatLabel(calcEnergy(this.series.data.map(p => ({ timestamp: p.x, value: p.y })), resolution, this.x), 'tooltip', type)}</b><br/>
+                   `;
+          case constants.RESOLUTIONS.YEAR_MONTH:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('MMMM. YYYY')}</b><br/>
+              Energy: <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+                   `;
+          case constants.RESOLUTIONS.MONTH_DAY:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('DD. MMMM')}</b><br/>
+              Energy: <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+                   `;
+          case constants.RESOLUTIONS.HOUR_MINUTE:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('HH:mm')}</b><br/>
+              Power: <b>${formatLabel(this.y, resolution)}</b><br/>
+                   `;
+          default:
+            return '';
+        }
+      };
     };
-
-    // formatLabel(calcEnergy(chartObj.values, resolution, this.y), 'tooltip', 'h')
 
     moment.locale('de');
     switch (resolution) {
@@ -57,6 +89,26 @@ export class Chart extends Component {
 
     this.chart.setTitle(chartTitle);
 
+    if (this.chart.series.length < chartData.length) {
+      for (const chartObj of chartData.sort((a, b) => (a.id - b.id))) {
+        this.chart.addSeries({
+          name: chartObj.name,
+          color: chartObj.color,
+          stack: chartObj.direction,
+          data: map(chartObj.values, v => ([v.timestamp, v.value])),
+        });
+      }
+    } else {
+      for (const chartObj of chartData) {
+        this.chart.series[chartObj.id].setData(map(chartObj.values, v => ([v.timestamp, v.value])));
+        this.chart.series[chartObj.id].update({
+          color: chartObj.color,
+          stack: chartObj.direction,
+          name: chartObj.name,
+        });
+      }
+    }
+
     if (layout === 'vertical') {
       this.chart.legend.update({
         align: 'left',
@@ -71,25 +123,11 @@ export class Chart extends Component {
       });
     }
 
-    if (this.chart.series.length < chartData.length) {
-      for (const chartObj of chartData.sort((a, b) => (a.id - b.id))) {
-        this.chart.addSeries({
-          name: `${chartObj.name} <span>${formatLabel(calcEnergy(chartObj.values, resolution), 'legend', currentType)}</span>`,
-          color: chartObj.color,
-          stack: chartObj.direction,
-          data: map(chartObj.values, v => ([v.timestamp, v.value])),
-        });
-      }
-    } else {
-      for (const chartObj of chartData) {
-        this.chart.series[chartObj.id].setData(map(chartObj.values, v => ([v.timestamp, v.value])));
-        this.chart.series[chartObj.id].update({
-          color: chartObj.color,
-          stack: chartObj.direction,
-          name: `${chartObj.name} <span>${formatLabel(calcEnergy(chartObj.values, resolution), 'legend', currentType)}</span>`,
-        });
-      }
-    }
+    this.chart.legend.update({
+      labelFormatter: function() {
+        return `<div style="margin-top: -10px">${this.name}</div><div style="margin-top: 4px; font-size: 14px">${formatLabel(calcEnergy(this.data.map(p => ({ timestamp: p.x, value: p.y })), resolution), 'legend', currentType)}</div>`
+      },
+    });
 
     const zoomIn = (newTimestamp, currentResolution) => {
       if (currentResolution === constants.RESOLUTIONS.HOUR_MINUTE) return;
@@ -213,8 +251,8 @@ function mapStateToProps(state) {
   return {
     resolution: state.charts.resolution,
     timestamp: state.charts.timestamp,
-    // chartData: generateFakeData(4),
-    chartData: state.charts.chartData,
+    chartData: generateFakeData(4),
+    // chartData: state.charts.chartData,
   };
 }
 

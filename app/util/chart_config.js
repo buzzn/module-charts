@@ -12,7 +12,16 @@ export default {
   },
   colors: ['#5FA2DD', '#F76C51'],
   exporting: { enabled: false },
-  legend: { enabled: true },
+  legend: {
+    enabled: true,
+    useHTML: true,
+    itemStyle: { border: '1px solid #ccc', padding: '10px', paddingLeft: '20px' },
+    itemMarginTop: 10,
+    symbolPadding: -14,
+    squareSymbol: true,
+    symbolHeight: 10,
+    symbolWidth: 10,
+  },
   title: {
     margin: 0,
     style: { color: '#000' },
@@ -76,7 +85,8 @@ export default {
   tooltip: {
     // shared: true,
     // split: true,
-    pointFormatter: function() { return `${this.series.name}: <b>${formatLabel(this.y, 'tooltip')}</b><br/>`; },
+    headerFormat: '',
+    useHTML: true,
     dateTimeLabelFormats: {
       millisecond: '%e.%b, %H:%M:%S.%L',
       second: '%e.%b, %H:%M:%S',

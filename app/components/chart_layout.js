@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default ({ Chart, constants, scores, loading, limit, changeResolution, changePage }) => (
+export default ({ Chart, constants, loading, limit, changeResolution, changePage }) => (
   <div className="col-12 chart-wrapper">
     <div style={{ position: 'relative' }}>
       <div className="text-center">
