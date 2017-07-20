@@ -4,13 +4,12 @@ import { getMomentPeriod } from './util/process_data';
 
 const initialState = {
   groupId: '',
+  registerId: null,
   resolution: constants.RESOLUTIONS.DAY_MINUTE,
   timestamp: new Date(),
-  inData: [],
-  outData: [],
+  chartData: [],
   loading: false,
   shouldUpdate: true,
-  scores: {},
 };
 
 export function shouldUpdate(timestamp, resolution) {
@@ -19,10 +18,10 @@ export function shouldUpdate(timestamp, resolution) {
 
 export default (state = initialState, action) => {
   switch (action.type) {
-    case constants.SET_GROUP:
-      return { ...state, groupId: action.groupId };
+    case constants.SET_GROUP_ID:
+      return { ...state, groupId: action.groupId, registerId: action.registerId };
     case constants.SET_DATA:
-      return { ...state, ...action.data };
+      return { ...state, chartData: action.data };
     case constants.SET_RESOLUTION:
       return { ...state, resolution: action.resolution, shouldUpdate: shouldUpdate(state.timestamp, action.resolution) };
     case constants.SET_TIMESTAMP:
@@ -31,8 +30,6 @@ export default (state = initialState, action) => {
       return { ...state, loading: true };
     case constants.LOADED:
       return { ...state, loading: false };
-    case constants.SET_SCORES:
-      return { ...state, scores: action.scores };
     case constants.CHART_UPDATE:
     default:
       return state;

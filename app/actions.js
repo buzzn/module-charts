@@ -2,7 +2,7 @@ export const constants = {
   SET_API_PARAMS: 'buzzn_charts/SET_API_PARAMS',
   SET_TOKEN: 'buzzn_charts/SET_TOKEN',
 
-  SET_GROUP: 'buzzn_charts/SET_GROUP',
+  SET_GROUP_ID: 'buzzn_charts/SET_GROUP_ID',
   SET_DATA: 'buzzn_charts/SET_DATA',
   RESOLUTIONS: {
     DAY_MINUTE: 'day',
@@ -15,18 +15,16 @@ export const constants = {
   LOADING: 'buzzn_charts/LOADING',
   LOADED: 'buzzn_charts/LOADED',
   CHART_UPDATE: 'buzzn_charts/CHART_UPDATE',
-  SET_SCORES: 'buzzn_charts/SET_SCORES',
 };
 
 export const actions = {
   setApiParams: ({ apiUrl, apiPath }) => ({ type: constants.SET_API_PARAMS, apiUrl, apiPath }),
   setToken: token => ({ type: constants.SET_TOKEN, token }),
-  setGroup: groupId => ({ type: constants.SET_GROUP, groupId }),
+  setGroupId: ({ groupId, registerId}) => ({ type: constants.SET_GROUP_ID, groupId, registerId }),
   setData: data => ({ type: constants.SET_DATA, data }),
   setResolution: resolution => ({ type: constants.SET_RESOLUTION, resolution }),
   setTimestamp: timestamp => ({ type: constants.SET_TIMESTAMP, timestamp }),
   loading: () => ({ type: constants.LOADING }),
   loaded: () => ({ type: constants.LOADED }),
   chartUpdate: () => ({ type: constants.CHART_UPDATE }),
-  setScores: (scores) => ({ type: constants.SET_SCORES, scores }),
 };

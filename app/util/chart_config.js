@@ -2,7 +2,7 @@ import { formatLabel } from './process_data';
 
 export default {
   chart: {
-    type: 'areaspline',
+    type: 'line',
     backgroundColor: 'rgba(255, 255, 255, 0.0)',
     spacingBottom: 20,
     spacingTop: 10,
@@ -32,6 +32,7 @@ export default {
     type: 'datetime',
     startOnTick: false,
     endOnTick: false,
+    tickmarkPlacement: 'between',
     labels: {
       enabled: true,
       style: { color: '#000' },
@@ -39,7 +40,7 @@ export default {
     title: { enabled: false },
   },
   yAxis: {
-    gridLineWidth: 0,
+    gridLineWidth: 1,
     min: 0,
     labels: {
       enabled: true,
@@ -56,7 +57,7 @@ export default {
       fillOpacity: 0.5,
       turboThreshold: 0,
     },
-    areaspline: {
+    line: {
       borderWidth: 0,
       cursor: 'pointer',
       events: {
@@ -66,13 +67,15 @@ export default {
     },
     column: {
       cursor: 'pointer',
+      stacking: 'normal',
       events: {
         // click: (event) => zoomInGroup(event.point.x),
       },
     },
   },
   tooltip: {
-    shared: true,
+    // shared: true,
+    // split: true,
     pointFormatter: function() { return `${this.series.name}: <b>${formatLabel(this.y, 'tooltip')}</b><br/>`; },
     dateTimeLabelFormats: {
       millisecond: '%e.%b, %H:%M:%S.%L',
