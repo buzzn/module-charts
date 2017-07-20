@@ -251,8 +251,8 @@ function mapStateToProps(state) {
   return {
     resolution: state.charts.resolution,
     timestamp: state.charts.timestamp,
-    chartData: generateFakeData(4),
-    // chartData: state.charts.chartData,
+    // chartData: generateFakeData(4),
+    chartData: state.charts.chartData,
   };
 }
 
