@@ -125,7 +125,10 @@ export class Chart extends Component {
 
     this.chart.legend.update({
       labelFormatter: function() {
-        return `<div style="margin-top: -10px">${this.name}</div><div style="margin-top: 4px; font-size: 14px">${formatLabel(calcEnergy(this.data.map(p => ({ timestamp: p.x, value: p.y })), resolution), 'legend', currentType)}</div>`
+        return `<div style="margin-top: -10px">${this.name}</div>
+                <div style="margin-top: 4px; font-size: 14px">
+                  ${formatLabel(calcEnergy((chartData.find(c => c.name === this.name) || {}).values || [], resolution), 'legend', currentType)}
+                </div>`
       },
     });
 

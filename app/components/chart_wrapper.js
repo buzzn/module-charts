@@ -46,6 +46,7 @@ export class ChartWrapper extends Component {
         limit={ limit }
         constants={ constants }
         Chart={ Chart }
+        timestamp={ timestamp }
         changeDate={ this.changeDate.bind(this) }
         changePage={ this.changePage.bind(this) }
         changeResolution={ this.changeResolution.bind(this) } />
