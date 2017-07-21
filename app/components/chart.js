@@ -190,8 +190,6 @@ export class Chart extends Component {
     const momentRes = getMomentPeriod(resolution);
 
     this.chart.xAxis[0].setExtremes(moment(timestamp).startOf(momentRes).valueOf(), moment(timestamp).endOf(momentRes).valueOf());
-    // this.chart.xAxis[0].update({ tickInterval: 3 * 3600 * 1000 });
-    // this.chart.yAxis[0].setExtremes();
     this.chart.redraw();
   }
 
@@ -216,45 +214,10 @@ export class Chart extends Component {
 }
 
 function mapStateToProps(state) {
-  const generateRnd = (min, max) => Math.floor(Math.random() * (max - min + 1) + min);
-  const generateValues = () => {
-    switch (state.charts.resolution) {
-      case constants.RESOLUTIONS.YEAR_MONTH:
-        return [...Array(9).keys()].map((i) => ({
-          timestamp: moment().startOf('year').add(i * 1, 'month').valueOf(),
-          value: generateRnd(107284690, 2107284690),
-        }));
-      case constants.RESOLUTIONS.MONTH_DAY:
-        return [...Array(17).keys()].map((i) => ({
-          timestamp: moment().startOf('month').add(i * 1, 'days').valueOf(),
-          value: generateRnd(10242823, 140242823),
-        }));
-      case constants.RESOLUTIONS.HOUR_MINUTE:
-        return [...Array(480).keys()].map((i) => ({
-          timestamp: moment().startOf('hour').add(i * 5, 'seconds').valueOf(),
-          value: generateRnd(45207, 452075),
-        }));
-      default:
-      case constants.RESOLUTIONS.DAY_MINUTE:
-        return [...Array(65).keys()].map((i) => ({
-          timestamp: moment().startOf('day').add(i * 15, 'minutes').valueOf(),
-          value: generateRnd(2445207, 24452075),
-        }));
-    }
-  };
-  const generateFakeData = num => [...Array(num).keys()].map((id) => ({
-    id,
-    direction: id % 2 ? 'out' : 'in',
-    name: Math.random().toString(36).substr(2, 7),
-    color: '#' + (Math.random()*0xFFFFFF<<0).toString(16),
-    values: generateValues(),
-  }));
-
   // TODO: replace 'charts' with 'mountedPath' ownProps parameter or constant
   return {
     resolution: state.charts.resolution,
     timestamp: state.charts.timestamp,
-    // chartData: generateFakeData(4),
     chartData: state.charts.chartData,
   };
 }
