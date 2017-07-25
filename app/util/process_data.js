@@ -99,8 +99,13 @@ export function calcEnergy(rawData, resolution, timestamp) {
         return rawData.reduce((s, d) => (d.value + s), 0) / rawData.length;
       }
     case constants.RESOLUTIONS.DAY_MINUTE:
-      if (timestamp) data = rawData.filter(v => v.timestamp <= timestamp);
-      if (data.length === 0) return 0;
+      if (timestamp) {
+        data = rawData.filter(v => v.timestamp <= timestamp);
+        // dirty hack, that will allow user to see energy on :00 points and no on :45 points.
+        if (data.length === 0) return 0;
+        data.pop();
+      }
+      if (data.length === 0) return '-----';
       if ((data.length % 4 !== 0) && timestamp) return '-----';
       return chunk(data, 4).reduce((sh, h) => (h.reduce((sv, v) => (sv + v.value), 0) / 4) + sh, 0);
     case constants.RESOLUTIONS.MONTH_DAY:
