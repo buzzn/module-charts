@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import moment from 'moment';
-import ChartInfoPanel from './chart_info_panel';
 import { constants, actions } from '../actions';
 import { getMomentPeriod } from '../util/process_data';
 import Chart from './chart';
@@ -11,6 +10,12 @@ export class ChartWrapper extends Component {
   static defaultProps = {
     Layout: ChartLayout,
   };
+
+  changeDate(newDate) {
+    const { setTimestamp, chartUpdate } = this.props;
+    setTimestamp(newDate);
+    chartUpdate();
+  }
 
   changePage(direction) {
     const { setTimestamp, resolution, timestamp, chartUpdate } = this.props;
@@ -41,7 +46,9 @@ export class ChartWrapper extends Component {
         limit={ limit }
         constants={ constants }
         Chart={ Chart }
-        ChartInfoPanel={ ChartInfoPanel }
+        timestamp={ timestamp }
+        resolution={ resolution }
+        changeDate={ this.changeDate.bind(this) }
         changePage={ this.changePage.bind(this) }
         changeResolution={ this.changeResolution.bind(this) } />
     );

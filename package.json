@@ -5,7 +5,7 @@
   "main": "dist/index.js",
   "scripts": {
     "test": "mocha --compilers js:babel-register --require babel-polyfill --require tests-setup.js --require ignore-styles $(find . -name '*.tests.js' ! -ipath '*node_modules*')",
-    "dev-server": "webpack-dashboard -- webpack-dev-server --progress --inline --hot --port=2999",
+    "dev-server": "webpack-dev-server --progress --inline --hot --port=2999",
     "build": "rimraf build && webpack --config ./webpack.production.config.js --progress --profile --colors",
     "postinstall": "babel app/ -d dist/"
   },
@@ -60,6 +60,7 @@
     "react-highcharts": "^12.0.0",
     "react-hot-loader": "^3.0.0-beta.6",
     "react-redux": "^5.0.3",
+    "redbox-react": "^1.4.3",
     "redux": "^3.6.0",
     "redux-mock-store": "^1.2.2",
     "redux-saga": "^0.14.6",

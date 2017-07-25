@@ -4,7 +4,7 @@ import ReactHighcharts from 'react-highcharts';
 import moment from 'moment';
 import map from 'lodash/map';
 import config from '../util/chart_config';
-import { sumData, getMomentPeriod, formatLabel } from '../util/process_data';
+import { calcEnergy, getMomentPeriod, formatLabel } from '../util/process_data';
 import { constants, actions } from '../actions';
 
 export class Chart extends Component {
@@ -17,15 +17,8 @@ export class Chart extends Component {
     });
   }
 
-  componentDidMount() {
-    this.chart = this.refs.chart.getChart();
-  }
-
-  componentWillReceiveProps(nextProps) {
-    const { resolution, timestamp, inData, outData, setResolution, setTimestamp, chartUpdate } = nextProps;
-
-    const inSum = inData;
-    const outSum = outData;
+  draw(props) {
+    const { resolution, timestamp, chartData, setResolution, setTimestamp, chartUpdate, layout, withTitle } = props;
 
     const chartTitle = { text: '' };
 
@@ -36,7 +29,41 @@ export class Chart extends Component {
     };
 
     const tooltipFormatter = function(type) {
-      return function() { return `${this.series.name}: <b>${formatLabel(this.y, 'tooltip', type)}</b><br/>`; };
+      return function() {
+        switch (resolution) {
+          case constants.RESOLUTIONS.DAY_MINUTE:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('DD. MMMM, HH:mm')}</b><br/>
+              Power: <b>${formatLabel(this.y, resolution)}</b><br/>
+              Energy: <b>${formatLabel(calcEnergy(this.series.data.map(p => ({ timestamp: p.x, value: p.y })), resolution, this.x), 'tooltip', type)}</b><br/>
+                   `;
+          case constants.RESOLUTIONS.YEAR_MONTH:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('MMMM. YYYY')}</b><br/>
+              Energy: <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+                   `;
+          case constants.RESOLUTIONS.MONTH_DAY:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('DD. MMMM')}</b><br/>
+              Energy: <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+                   `;
+          case constants.RESOLUTIONS.HOUR_MINUTE:
+            return `
+              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
+              <hr style="margin: 0; border-top: 1px solid black;"/>
+              Time: <b>${moment(this.x).format('HH:mm')}</b><br/>
+              Power: <b>${formatLabel(this.y, resolution)}</b><br/>
+                   `;
+          default:
+            return '';
+        }
+      };
     };
 
     moment.locale('de');
@@ -56,19 +83,58 @@ export class Chart extends Component {
       default:
       case constants.RESOLUTIONS.DAY_MINUTE:
         chartTitle.text = moment(timestamp).format('DD.MM.YYYY');
-        currentType = '';
+        currentType = 'h';
         break;
     }
 
-    this.chart.setTitle(chartTitle);
-
-    if (this.chart.series.length === 0) {
-      this.chart.addSeries({ name: 'Gesamtverbrauch', data: map(inSum, v => ([v.timestamp, v.powerMilliwatt])) });
-      this.chart.addSeries({ name: 'Gesamterzeugung', data: map(outSum, v => ([v.timestamp, v.powerMilliwatt])) });
+    if (withTitle) {
+      this.chart.setTitle(chartTitle);
     } else {
-      this.chart.series[0].setData(map(inSum, v => ([v.timestamp, v.powerMilliwatt])));
-      this.chart.series[1].setData(map(outSum, v => ([v.timestamp, v.powerMilliwatt])));
+      this.chart.setTitle({ text: null });
     }
+
+    if (this.chart.series.length < chartData.length) {
+      for (const chartObj of chartData.sort((a, b) => (a.id - b.id))) {
+        this.chart.addSeries({
+          name: chartObj.name,
+          color: chartObj.color,
+          stack: chartObj.direction,
+          data: map(chartObj.values, v => ([v.timestamp, v.value])),
+        });
+      }
+    } else {
+      for (const chartObj of chartData) {
+        this.chart.series[chartObj.id].setData(map(chartObj.values, v => ([v.timestamp, v.value])));
+        this.chart.series[chartObj.id].update({
+          color: chartObj.color,
+          stack: chartObj.direction,
+          name: chartObj.name,
+        });
+      }
+    }
+
+    if (layout === 'vertical') {
+      this.chart.legend.update({
+        align: 'left',
+        verticalAlign: 'middle',
+        layout: 'vertical',
+      });
+    } else {
+      this.chart.legend.update({
+        align: 'center',
+        verticalAlign: 'bottom',
+        layout: 'horizontal',
+      });
+    }
+
+    this.chart.legend.update({
+      labelFormatter: function() {
+        return `<div style="margin-top: -10px">${this.name}</div>
+                <div style="margin-top: 4px; font-size: 14px">
+                  ${formatLabel(calcEnergy((chartData.find(c => c.name === this.name) || {}).values || [], resolution), 'legend', currentType)}
+                </div>`
+      },
+    });
 
     const zoomIn = (newTimestamp, currentResolution) => {
       if (currentResolution === constants.RESOLUTIONS.HOUR_MINUTE) return;
@@ -111,13 +177,13 @@ export class Chart extends Component {
         this.chart.update({
           yAxis: {
             labels: {
-              formatter: axisFormatter(currentType),
+              formatter: axisFormatter(''),
             },
           },
         });
         this.chart.series.forEach((series) => {
           series.update({
-            type: 'areaspline',
+            type: 'line',
             tooltip: { pointFormatter: tooltipFormatter(currentType) },
             events: { click(event) { zoomIn(event.point.x, resolution); } },
           });
@@ -128,17 +194,30 @@ export class Chart extends Component {
     const momentRes = getMomentPeriod(resolution);
 
     this.chart.xAxis[0].setExtremes(moment(timestamp).startOf(momentRes).valueOf(), moment(timestamp).endOf(momentRes).valueOf());
-    // this.chart.yAxis[0].setExtremes();
+    if (resolution === constants.RESOLUTIONS.DAY_MINUTE) {
+      this.chart.xAxis[0].update({ tickInterval: 3 * 60 * 60 * 1000 });
+    } else {
+      this.chart.xAxis[0].update({ tickInterval: null });
+    }
     this.chart.redraw();
   }
 
-  shouldComponentUpdate(nextProps, nextState) {
+  componentDidMount() {
+    this.chart = this.refs.chart.getChart();
+    this.draw(this.props);
+  }
+
+  componentWillReceiveProps(nextProps) {
+    this.draw(nextProps);
+  }
+
+  shouldComponentUpdate() {
     return false;
   }
 
   render() {
     return (
-      <ReactHighcharts config={ config } ref="chart" domProps={{ className: 'chart', style: { width: '94%', height: '300px', marginLeft: '3%' } }}></ReactHighcharts>
+      <ReactHighcharts config={ config } ref="chart" domProps={{ className: 'chart', style: { width: '100%', height: '100%' } }}></ReactHighcharts>
     );
   }
 }
@@ -148,8 +227,7 @@ function mapStateToProps(state) {
   return {
     resolution: state.charts.resolution,
     timestamp: state.charts.timestamp,
-    inData: state.charts.inData,
-    outData: state.charts.outData,
+    chartData: state.charts.chartData,
   };
 }
 

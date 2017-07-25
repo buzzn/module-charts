@@ -9,22 +9,18 @@ export const getConfig = state => state.config;
 export const getCharts = state => state.charts;
 
 export function* clearData() {
-  yield put(actions.setData({ inData: [], outData: [] }));
+  yield put(actions.setData([]));
 }
 
-export function* fetchData({ apiUrl, apiPath, token, groupId }) {
+export function* fetchData({ apiUrl, apiPath, token, groupId, registerId }) {
   yield put(actions.loading());
 
   const { resolution, timestamp } = yield select(getCharts);
 
   try {
-    const data = yield call(api.getChart, { apiUrl, apiPath, groupId, timestamp, resolution, token });
+    // TODO: add api call for register chart data if !!registerId
+    const data = yield call(api.getGroupChart, { apiUrl, apiPath, groupId, timestamp, resolution, token });
     yield put(actions.setData(data));
-    if (resolution !== constants.RESOLUTIONS.HOUR_MINUTE) {
-      const interval = getMomentPeriod(resolution);
-      // const scores = yield call(api.getScores, { apiUrl, apiPath, groupId, timestamp, interval, token });
-      // yield put(actions.setScores(scores));
-    }
   } catch (error) {
     console.log(error);
     yield call(clearData);
@@ -33,9 +29,9 @@ export function* fetchData({ apiUrl, apiPath, token, groupId }) {
   yield put(actions.loaded());
 }
 
-export function* getData({ apiUrl, apiPath, token }, { groupId }) {
+export function* getData({ apiUrl, apiPath, token }, { groupId, registerId }) {
   while (true) {
-    yield call(fetchData, { apiUrl, apiPath, token, groupId });
+    yield call(fetchData, { apiUrl, apiPath, token, groupId, registerId });
 
     const { resolution, timestamp, shouldUpdate } = yield select(getCharts);
 
@@ -74,26 +70,27 @@ export function* getData({ apiUrl, apiPath, token }, { groupId }) {
   }
 }
 
-export function* chartSagas({ apiUrl, apiPath, token, groupId }) {
-  yield takeLatest(constants.SET_GROUP, getData, { apiUrl, apiPath, token });
-  if (groupId) yield put(actions.setGroup(groupId));
+export function* chartSagas({ apiUrl, apiPath, token, groupId, registerId }) {
+  yield takeLatest(constants.SET_GROUP_ID, getData, { apiUrl, apiPath, token });
+  if (groupId) yield put(actions.setGroupId({ groupId, registerId }));
 }
 
 export default function* chartsSaga() {
   const { apiUrl, apiPath } = yield take(constants.SET_API_PARAMS);
   let { token } = yield take(constants.SET_TOKEN);
 
-  let { groupId } = yield select(getCharts);
+  let { groupId, registerId } = yield select(getCharts);
   if (groupId) {
-    yield call(fetchData, { apiUrl, apiPath, token, groupId });
+    yield call(fetchData, { apiUrl, apiPath, token, groupId, registerId });
   }
 
   while (true) {
-    const sagas = yield fork(chartSagas, { apiUrl, apiPath, token, groupId });
+    const sagas = yield fork(chartSagas, { apiUrl, apiPath, token, groupId, registerId });
     const payload = yield take(constants.SET_TOKEN);
     token = payload.token;
-    const { groupId: newGroupId } = yield select(getCharts);
+    const { groupId: newGroupId, registerId: newRegisterId } = yield select(getCharts);
     groupId = newGroupId;
+    registerId = newRegisterId;
     yield cancel(sagas);
   }
 }

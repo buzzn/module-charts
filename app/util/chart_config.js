@@ -2,7 +2,7 @@ import { formatLabel } from './process_data';
 
 export default {
   chart: {
-    type: 'areaspline',
+    type: 'line',
     backgroundColor: 'rgba(255, 255, 255, 0.0)',
     spacingBottom: 20,
     spacingTop: 10,
@@ -12,8 +12,18 @@ export default {
   },
   colors: ['#5FA2DD', '#F76C51'],
   exporting: { enabled: false },
-  legend: { enabled: true },
+  legend: {
+    enabled: true,
+    useHTML: true,
+    itemStyle: { border: '1px solid #ccc', padding: '10px', paddingLeft: '20px' },
+    itemMarginTop: 10,
+    symbolPadding: -14,
+    squareSymbol: true,
+    symbolHeight: 10,
+    symbolWidth: 10,
+  },
   title: {
+    text: null,
     margin: 0,
     style: { color: '#000' },
   },
@@ -32,6 +42,7 @@ export default {
     type: 'datetime',
     startOnTick: false,
     endOnTick: false,
+    tickmarkPlacement: 'between',
     labels: {
       enabled: true,
       style: { color: '#000' },
@@ -39,7 +50,7 @@ export default {
     title: { enabled: false },
   },
   yAxis: {
-    gridLineWidth: 0,
+    gridLineWidth: 1,
     min: 0,
     labels: {
       enabled: true,
@@ -56,7 +67,7 @@ export default {
       fillOpacity: 0.5,
       turboThreshold: 0,
     },
-    areaspline: {
+    line: {
       borderWidth: 0,
       cursor: 'pointer',
       events: {
@@ -66,14 +77,17 @@ export default {
     },
     column: {
       cursor: 'pointer',
+      stacking: 'normal',
       events: {
         // click: (event) => zoomInGroup(event.point.x),
       },
     },
   },
   tooltip: {
-    shared: true,
-    pointFormatter: function() { return `${this.series.name}: <b>${formatLabel(this.y, 'tooltip')}</b><br/>`; },
+    // shared: true,
+    // split: true,
+    headerFormat: '',
+    useHTML: true,
     dateTimeLabelFormats: {
       millisecond: '%e.%b, %H:%M:%S.%L',
       second: '%e.%b, %H:%M:%S',

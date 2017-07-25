@@ -1,9 +1,5 @@
 import 'whatwg-fetch';
 import moment from 'moment';
-import forEach from 'lodash/forEach';
-import map from 'lodash/map';
-import find from 'lodash/find';
-import { constants } from './actions';
 
 function prepareHeaders(token) {
   const headers = {
@@ -27,28 +23,25 @@ export function uriTimestamp(timestamp) {
   return encodeURIComponent(moment(timestamp).format('YYYY-MM-DDTHH:mm:ss.SSSZ'));
 }
 
-function formatScores(jsonRaw) {
-  const scores = {};
-  const json = map(jsonRaw.data || jsonRaw, jr => jr.attributes || jr);
-  forEach(['fitting', 'autarchy', 'closeness', 'sufficiency'], type => {
-    const score = find(json, j => j.mode === type);
-    scores[type] = score ? score.value : 0;
-  });
-  return scores;
-}
-
 export default {
-  getChart: ({ apiUrl, apiPath, groupId, timestamp, resolution, token }) => (
+  getGroupChart: ({ apiUrl, apiPath, groupId, timestamp, resolution, token }) => (
     fetch(`${apiUrl}${apiPath}/${groupId}/charts?timestamp=${uriTimestamp(timestamp)}&duration=${resolution}`, { headers: prepareHeaders(token) })
     .then(parseResponse)
-    .then(data => ({
-      inData: data.in.map(d => ({ powerMilliwatt: d.value, timestamp: new Date(d.timestamp).getTime() })),
-      outData: data.out.map(d => ({ powerMilliwatt: d.value, timestamp: new Date(d.timestamp).getTime() })),
-    }))
-  ),
-  getScores: ({ apiUrl, apiPath, groupId, interval, timestamp, token }) => (
-    fetch(`${apiUrl}${apiPath}/${groupId}/scores?timestamp=${uriTimestamp(timestamp)}&interval=${interval}`, { headers: prepareHeaders(token) })
-    .then(parseResponse)
-    .then(formatScores)
+    .then(data => ([
+      {
+        id: 0,
+        direction: 'in',
+        name: 'Consumption',
+        color: '#00bcd4',
+        values: data.in.map(d => ({ value: d.value / 1000, timestamp: new Date(d.timestamp).getTime() * 1000 }))
+      },
+      {
+        id: 1,
+        direction: 'out',
+        name: 'Production',
+        color: '#afb42b',
+        values: data.out.map(d => ({ value: d.value / 1000, timestamp: new Date(d.timestamp).getTime() * 1000 }))
+      },
+    ]))
   ),
 };
