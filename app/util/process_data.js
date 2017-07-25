@@ -101,7 +101,7 @@ export function calcEnergy(rawData, resolution, timestamp) {
     case constants.RESOLUTIONS.DAY_MINUTE:
       if (timestamp) data = rawData.filter(v => v.timestamp <= timestamp);
       if (data.length === 0) return 0;
-      if (!data.length % 4) return '-----';
+      if (!(data.length % 4) && timestamp) return '-----';
       return chunk(data, 4).reduce((sh, h) => (h.reduce((sv, v) => (sv + v.value), 0) / 4) + sh, 0);
     case constants.RESOLUTIONS.MONTH_DAY:
     case constants.RESOLUTIONS.YEAR_MONTH:
