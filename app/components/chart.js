@@ -90,7 +90,7 @@ export class Chart extends Component {
     if (withTitle) {
       this.chart.setTitle(chartTitle);
     } else {
-      this.chart.setTitle(null);
+      this.chart.setTitle({ text: null });
     }
 
     if (this.chart.series.length < chartData.length) {

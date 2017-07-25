@@ -23,6 +23,7 @@ export default {
     symbolWidth: 10,
   },
   title: {
+    text: null,
     margin: 0,
     style: { color: '#000' },
   },
