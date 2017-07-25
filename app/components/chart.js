@@ -87,7 +87,11 @@ export class Chart extends Component {
         break;
     }
 
-    if (withTitle) this.chart.setTitle(chartTitle);
+    if (withTitle) {
+      this.chart.setTitle(chartTitle);
+    } else {
+      this.chart.setTitle(null);
+    }
 
     if (this.chart.series.length < chartData.length) {
       for (const chartObj of chartData.sort((a, b) => (a.id - b.id))) {
