@@ -67,6 +67,7 @@ function formatNumber(value) {
 }
 
 export function formatLabel(value, mode, type) {
+  if (typeof value !== 'number') return value;
   let result = '';
 
   const number = formatNumber(value);
@@ -100,7 +101,8 @@ export function calcEnergy(rawData, resolution, timestamp) {
     case constants.RESOLUTIONS.DAY_MINUTE:
       if (timestamp) data = rawData.filter(v => v.timestamp <= timestamp);
       if (data.length === 0) return 0;
-      return chunk(data, 4).reduce((sh, h) => (h.reduce((sv, v) => (sv + v.value), 0) / h.length) + sh, 0);
+      if (!data.length % 4) return '-----';
+      return chunk(data, 4).reduce((sh, h) => (h.reduce((sv, v) => (sv + v.value), 0) / 4) + sh, 0);
     case constants.RESOLUTIONS.MONTH_DAY:
     case constants.RESOLUTIONS.YEAR_MONTH:
       if (rawData.length === 0) return 0;

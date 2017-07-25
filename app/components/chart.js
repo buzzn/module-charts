@@ -83,7 +83,7 @@ export class Chart extends Component {
       default:
       case constants.RESOLUTIONS.DAY_MINUTE:
         chartTitle.text = moment(timestamp).format('DD.MM.YYYY');
-        currentType = '';
+        currentType = 'h';
         break;
     }
 
@@ -177,7 +177,7 @@ export class Chart extends Component {
         this.chart.update({
           yAxis: {
             labels: {
-              formatter: axisFormatter(currentType),
+              formatter: axisFormatter(''),
             },
           },
         });
