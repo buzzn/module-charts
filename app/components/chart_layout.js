@@ -11,7 +11,7 @@ export default ({ Chart, constants, loading, limit, changeDate, timestamp, resol
       </div>
       <button className="btn btn-default btn-icon btn-circle icon-lg btn-chart-prev fa fa-chevron-left fa-2x" onClick={ () => changePage('prev') } disabled={ loading }></button>
       <button className="btn btn-default btn-icon btn-circle icon-lg btn-chart-next pull-right fa fa-chevron-right fa-2x" onClick={ () => changePage('next') } disabled={ loading || limit }></button>
-      <Chart layout="horizontal" />
+      <Chart layout="horizontal" withTitle={ true } />
     </div>
   </div>
 );

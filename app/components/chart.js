@@ -18,7 +18,7 @@ export class Chart extends Component {
   }
 
   draw(props) {
-    const { resolution, timestamp, chartData, setResolution, setTimestamp, chartUpdate, layout } = props;
+    const { resolution, timestamp, chartData, setResolution, setTimestamp, chartUpdate, layout, withTitle } = props;
 
     const chartTitle = { text: '' };
 
@@ -87,7 +87,7 @@ export class Chart extends Component {
         break;
     }
 
-    this.chart.setTitle(chartTitle);
+    if (withTitle) this.chart.setTitle(chartTitle);
 
     if (this.chart.series.length < chartData.length) {
       for (const chartObj of chartData.sort((a, b) => (a.id - b.id))) {
