@@ -83,7 +83,7 @@ export class Chart extends Component {
       default:
       case constants.RESOLUTIONS.DAY_MINUTE:
         chartTitle.text = moment(timestamp).format('DD.MM.YYYY');
-        currentType = 'h';
+        currentType = '';
         break;
     }
 
@@ -194,6 +194,11 @@ export class Chart extends Component {
     const momentRes = getMomentPeriod(resolution);
 
     this.chart.xAxis[0].setExtremes(moment(timestamp).startOf(momentRes).valueOf(), moment(timestamp).endOf(momentRes).valueOf());
+    if (resolution === constants.RESOLUTIONS.DAY_MINUTE) {
+      this.chart.xAxis[0].update({ tickInterval: 3 * 60 * 60 * 1000 });
+    } else {
+      this.chart.xAxis[0].update({ tickInterval: null });
+    }
     this.chart.redraw();
   }
 
