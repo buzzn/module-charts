@@ -19,6 +19,7 @@ export default {
     itemMarginTop: 10,
     symbolPadding: -14,
     squareSymbol: true,
+    symbolRadius: 0,
     symbolHeight: 10,
     symbolWidth: 10,
   },
@@ -88,6 +89,9 @@ export default {
     // split: true,
     headerFormat: '',
     useHTML: true,
+    backgroundColor: '#a8a8a8',
+    padding: 0,
+    style: { color: 'white', minWidth: '100px' },
     dateTimeLabelFormats: {
       millisecond: '%e.%b, %H:%M:%S.%L',
       second: '%e.%b, %H:%M:%S',

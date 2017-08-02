@@ -33,32 +33,36 @@ export class Chart extends Component {
         switch (resolution) {
           case constants.RESOLUTIONS.DAY_MINUTE:
             return `
-              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
-              <hr style="margin: 0; border-top: 1px solid black;"/>
-              Time: <b>${moment(this.x).format('DD. MMMM, HH:mm')}</b><br/>
-              Power: <b>${formatLabel(this.y, resolution)}</b><br/>
-              Energy: <b>${formatLabel(calcEnergy(this.series.data.map(p => ({ timestamp: p.x, value: p.y })), resolution, this.x), 'tooltip', type)}</b><br/>
+              <div style="text-align: center; font-size: 16px; padding: 6px; background-color: #6c6c6c"><b>${this.series.name}</b></div>
+              <div style="padding: 6px">
+                <div style="width: 60px; display: inline-block">Time:</div> <b>${moment(this.x).format('DD. MMMM, HH:mm')}</b><br/>
+                <div style="width: 60px; display: inline-block">Power:</div> <b>${formatLabel(this.y, resolution)}</b><br/>
+                <div style="width: 60px; display: inline-block">Energy:</div> <b>${formatLabel(calcEnergy(this.series.data.map(p => ({ timestamp: p.x, value: p.y })), resolution, this.x), 'tooltip', type)}</b><br/>
+              </div>
                    `;
           case constants.RESOLUTIONS.YEAR_MONTH:
             return `
-              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
-              <hr style="margin: 0; border-top: 1px solid black;"/>
-              Time: <b>${moment(this.x).format('MMMM. YYYY')}</b><br/>
-              Energy: <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+              <div style="text-align: center; font-size: 16px; padding: 6px; background-color: #6c6c6c"><b>${this.series.name}</b></div>
+              <div style="padding: 6px">
+                <div style="width: 60px; display: inline-block">Time:</div> <b>${moment(this.x).format('MMMM. YYYY')}</b><br/>
+                <div style="width: 60px; display: inline-block">Energy:</div> <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+              </div>
                    `;
           case constants.RESOLUTIONS.MONTH_DAY:
             return `
-              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
-              <hr style="margin: 0; border-top: 1px solid black;"/>
-              Time: <b>${moment(this.x).format('DD. MMMM')}</b><br/>
-              Energy: <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+              <div style="text-align: center; font-size: 16px; padding: 6px; background-color: #6c6c6c"><b>${this.series.name}</b></div>
+              <div style="padding: 6px">
+                <div style="width: 60px; display: inline-block">Time:</div> <b>${moment(this.x).format('DD. MMMM')}</b><br/>
+                <div style="width: 60px; display: inline-block">Energy:</div> <b>${formatLabel(this.y, resolution, 'h')}</b><br/>
+              </div>
                    `;
           case constants.RESOLUTIONS.HOUR_MINUTE:
             return `
-              <div style="text-align: center; font-size: 16px; padding-bottom: 6px"><b>${this.series.name}</b></div>
-              <hr style="margin: 0; border-top: 1px solid black;"/>
-              Time: <b>${moment(this.x).format('HH:mm')}</b><br/>
-              Power: <b>${formatLabel(this.y, resolution)}</b><br/>
+              <div style="text-align: center; font-size: 16px; padding: 6px; background-color: #6c6c6c"><b>${this.series.name}</b></div>
+              <div style="padding: 6px">
+                <div style="width: 60px; display: inline-block">Time:</div> <b>${moment(this.x).format('HH:mm')}</b><br/>
+                <div style="width: 60px; display: inline-block">Power:</div> <b>${formatLabel(this.y, resolution)}</b><br/>
+              </div>
                    `;
           default:
             return '';
