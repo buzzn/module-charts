@@ -101,7 +101,7 @@ export function calcEnergy(rawData, resolution, timestamp) {
     case constants.RESOLUTIONS.DAY_MINUTE:
       if (timestamp) {
         data = rawData.filter(v => v.timestamp <= timestamp);
-        // dirty hack, that will allow user to see energy on :00 points and no on :45 points.
+        // dirty hack, that will allow user to see energy on :00 points and not on :45 points.
         if (data.length === 0) return 0;
         data.pop();
       }
