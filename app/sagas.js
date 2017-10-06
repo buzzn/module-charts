@@ -1,7 +1,7 @@
-import { constants, actions } from './actions';
 import { delay } from 'redux-saga';
-import { call, put, fork, take, select, race, takeLatest } from 'redux-saga/effects';
+import { call, put, fork, take, select, race, takeLatest, cancel } from 'redux-saga/effects';
 import moment from 'moment';
+import { constants, actions } from './actions';
 import api from './api';
 import { getMomentPeriod } from './util/process_data';
 
