@@ -7,8 +7,13 @@
     "test": "mocha --compilers js:babel-register --require babel-polyfill --require tests-setup.js --require ignore-styles $(find . -name '*.tests.js' ! -ipath '*node_modules*')",
     "dev-server": "webpack-dev-server --progress --inline --hot --port=2999",
     "build": "rimraf build && webpack --config ./webpack.production.config.js --progress --profile --colors",
-    "postinstall": "npx babel app/ -d dist/"
+    "compat": "npx babel app/ -d dist/",
+    "add-dist": "git add ."
   },
+  "pre-commit": [
+    "compat",
+    "add-dist"
+  ],
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -35,8 +40,8 @@
     "@babel/preset-react": "^7.0.0-beta.34",
     "@babel/register": "^7.0.0-beta.34",
     "autoprefixer": "^6.7.7",
-    "bootstrap": "4.0.0-alpha.6",
     "babel-loader": "^8.0.0-beta.0",
+    "bootstrap": "4.0.0-alpha.6",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
     "chai-enzyme": "^0.6.1",
@@ -64,6 +69,7 @@
     "postcss": "^5.2.16",
     "postcss-flexbugs-fixes": "^2.1.0",
     "postcss-loader": "^1.3.3",
+    "pre-commit": "^1.2.2",
     "precss": "^1.4.0",
     "prop-types": "^15.5.4",
     "react": "^15.5.3",

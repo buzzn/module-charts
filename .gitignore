@@ -10,7 +10,6 @@ settings.json
 node_modules/*
 
 build/*
-dist/*
 
 *.iml
 .idea/
